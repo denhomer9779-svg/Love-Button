@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>无边框爱心点赞效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: transparent;
+            overflow: hidden;
+        }
+        
+        .heart-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 1rem;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 使用纯CSS创建爱心形状 */
+        .heart {
+            position: relative;
+            width: 45px;
+            height: 45px;
+            transition: all 0.3s ease;
+        }
+        
+        .heart:before, .heart:after {
+            content: "";
+            position: absolute;
+            width: 25px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border-radius: 25px 25px 0 0;
+            transition: all 0.3s ease;
+        }
+        
+        .heart:before {
+            left: 25px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+        
+        .heart:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        
+        .heart-btn:hover .heart {
+            transform: scale(1.15);
+        }
+        
+        .heart-btn:active .heart {
+            transform: scale(0.9);
+        }
+        
+        /* 粒子使用纯CSS绘制的爱心 */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 10;
+            animation: float 1.8s ease-out forwards;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .particle:before, .particle:after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 16px;
+            background: #ff6b6b;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .particle:before {
+            left: 10px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+        
+        .particle:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        
+        @keyframes float {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.8) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--r));
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="heart-btn" id="heartBtn">
+        <div class="heart"></div>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const heartBtn = document.getElementById('heartBtn');
+            
+            heartBtn.addEventListener('click', function(e) {
+                createParticles(e);
+            });
+            
+            function createParticles(event) {
+                const rect = heartBtn.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                
+                // 创建爱心粒子
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        
+                        // 随机颜色 - 粉色系
+                        const hue = Math.floor(Math.random() * 10) + 350;
+                        const saturation = Math.floor(Math.random() * 30) + 70;
+                        const lightness = Math.floor(Math.random() * 15) + 60;
+                        
+                        // 设置粒子颜色
+                        const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                        particle.style.setProperty('--particle-color', color);
+                        
+                        // 使用CSS变量设置粒子颜色
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .particle:before, .particle:after {
+                                background: ${color};
+                            }
+                        `;
+                        document.head.appendChild(style);
+                        
+                        // 随机化粒子飞散的方向和距离
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = Math.random() * 120 + 80;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance;
+                        const rotation = Math.random() * 360;
+                        
+                        particle.style.setProperty('--tx', `${tx}px`);
+                        particle.style.setProperty('--ty', `${ty}px`);
+                        particle.style.setProperty('--r', `${rotation}deg`);
+                        particle.style.left = `${x - 10}px`;
+                        particle.style.top = `${y - 10}px`;
+                        
+                        // 随机大小
+                        const size = Math.random() * 0.6 + 0.8;
+                        particle.style.transform = `scale(${size})`;
+                        
+                        document.body.appendChild(particle);
+                        
+                        // 动画结束后移除粒子
+                        setTimeout(() => {
+                            if (particle.parentNode) {
+                                particle.parentNode.removeChild(particle);
+                            }
+                            if (style.parentNode) {
+                                style.parentNode.removeChild(style);
+                            }
+                        }, 1800);
+                    }, i * 40);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
